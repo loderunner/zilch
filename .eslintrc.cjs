@@ -28,6 +28,7 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
+    'react/prop-types': 'off',
     'sort-imports': ['warn', { ignoreDeclarationSort: true }],
     'import/first': 'warn',
     'import/order': [
