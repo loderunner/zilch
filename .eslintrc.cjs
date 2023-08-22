@@ -1,16 +1,33 @@
 module.exports = {
+  root: true,
   env: {
     browser: true,
     es2021: true,
     node: true,
   },
-  plugins: ['import'],
-  extends: ['eslint:recommended', 'plugin:import/recommended', 'prettier'],
+  plugins: ['import', 'react-refresh'],
+  extends: [
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:react/jsx-runtime',
+    'plugin:react-hooks/recommended',
+    'plugin:import/recommended',
+    'prettier',
+  ],
+  ignorePatterns: ['dist', 'vite.config.js'],
+  settings: {
+    react: { version: '18.2.21' },
+    'import/parser': 'babel-eslint',
+  },
   rules: {
     'no-debugger': 'off',
     curly: ['error', 'all'],
     'prefer-const': 'error',
     eqeqeq: 'error',
+    'react-refresh/only-export-components': [
+      'warn',
+      { allowConstantExport: true },
+    ],
     'sort-imports': ['warn', { ignoreDeclarationSort: true }],
     'import/first': 'warn',
     'import/order': [
