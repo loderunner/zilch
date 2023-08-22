@@ -1,22 +1,56 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import Die from './Die.jsx';
+import solve from './solve';
 
 export default function App() {
-  const [game, setGame] = useState([
-    { value: 1, state: 'used' },
-    { value: 1, state: 'used' },
-    { value: 1, state: 'used' },
-    { value: 1, state: 'used' },
-    { value: 1, state: 'used' },
-  ]);
+  const [game, setGame] = useState({
+    score: 0,
+    runScore: 0,
+    addScore: 0,
+    dice: [
+      { value: 1, state: 'used' },
+      { value: 1, state: 'used' },
+      { value: 1, state: 'used' },
+      { value: 1, state: 'used' },
+      { value: 1, state: 'used' },
+    ],
+  });
+
+  const dice = useMemo(() => game.dice, [game.dice]);
+  const setDice = useCallback(
+    (newDice) => setGame({ ...game, dice: newDice }),
+    [game],
+  );
+
+  const selected = useMemo(
+    () => dice.filter((d) => d.state === 'selected'),
+    [dice],
+  );
+
+  const solved = useMemo(() => solve(selected.map((d) => d.value)), [selected]);
+
+  const valid = useMemo(
+    () => solved.used === selected.length,
+    [selected.length, solved.used],
+  );
+
+  const throwable = useMemo(() => {
+    if (dice.every((d) => d.state === 'used')) {
+      return true;
+    }
+    if (dice.some((d) => d.state === 'selected')) {
+      return valid;
+    }
+    return false;
+  }, [dice, valid]);
 
   const onThrow = useCallback(() => {
-    const first = game.every(
+    const first = dice.every(
       (d) => d.state === 'used' || d.state === 'selected',
     );
 
-    const next = game.map((d) => {
+    const next = dice.map((d) => {
       if (!first) {
         if (d.state === 'used') {
           return { ...d };
@@ -27,12 +61,17 @@ export default function App() {
       }
       return { value: Math.floor(Math.random() * 6) + 1, state: 'thrown' };
     });
-    setGame(next);
-  }, [game]);
+    setGame({
+      ...game,
+      runScore: game.runScore + solved.score,
+      addScore: 0,
+      dice: next,
+    });
+  }, [dice, game, solved.score]);
 
   const onSelectDie = useCallback(
     (i) => {
-      const d = game[i];
+      const d = dice[i];
       let state;
       if (d.state === 'thrown') {
         state = 'selected';
@@ -41,21 +80,41 @@ export default function App() {
       } else {
         state = d.state;
       }
-      setGame([
-        ...game.slice(0, i),
+      setDice([
+        ...dice.slice(0, i),
         { value: d.value, state },
-        ...game.slice(i + 1),
+        ...dice.slice(i + 1),
       ]);
     },
-    [game],
+    [dice, setDice],
   );
+
+  useEffect(() => {
+    if (valid) {
+      setGame({ ...game, addScore: solved.score });
+    } else {
+      setGame({ ...game, addScore: 0 });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected]);
 
   return (
     <>
-      {game.map((d, i) => (
-        <Die key={i} die={d} onSelect={() => onSelectDie(i)} />
-      ))}
-      <button onClick={onThrow}>Throw!</button>
+      <div>
+        {dice.map((d, i) => (
+          <Die key={i} die={d} valid={valid} onSelect={() => onSelectDie(i)} />
+        ))}
+      </div>
+      <div>
+        Score: {game.score}
+        Run: {game.runScore}
+        {game.addScore ? `+${game.addScore}` : null}
+      </div>
+      <div>
+        <button onClick={onThrow} disabled={!throwable}>
+          Throw!
+        </button>
+      </div>
     </>
   );
 }

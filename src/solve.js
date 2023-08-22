@@ -1,11 +1,14 @@
 import combinations from './combinations';
 
 /**
- * @param {string[]} play
+ * @param {number[]} play
  * @returns {{score: number, used: number}}
  */
 export default function solve(play) {
-  const playStr = play.sort().join('');
+  const playStr = play
+    .map((d) => d.toString())
+    .sort()
+    .join('');
 
   let combo;
   let max = 0;
@@ -27,7 +30,7 @@ export default function solve(play) {
   }
 
   if (play.length > combo.length) {
-    const nextPlay = playStr.split('');
+    const nextPlay = playStr.split('').map((d) => parseInt(d));
     nextPlay.splice(comboIndex, combo.length);
     const subSolve = solve(nextPlay);
     return { score: max + subSolve.score, used: combo.length + subSolve.used };
