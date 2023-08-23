@@ -3,19 +3,21 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Die from './Die.jsx';
 import solve from './solve';
 
+const initialGame = {
+  score: 0,
+  runScore: 0,
+  addScore: 0,
+  dice: [
+    { value: 1, state: 'used' },
+    { value: 1, state: 'used' },
+    { value: 1, state: 'used' },
+    { value: 1, state: 'used' },
+    { value: 1, state: 'used' },
+  ],
+};
+
 export default function App() {
-  const [game, setGame] = useState({
-    score: 0,
-    runScore: 0,
-    addScore: 0,
-    dice: [
-      { value: 1, state: 'used' },
-      { value: 1, state: 'used' },
-      { value: 1, state: 'used' },
-      { value: 1, state: 'used' },
-      { value: 1, state: 'used' },
-    ],
-  });
+  const [game, setGame] = useState(initialGame);
 
   const dice = useMemo(() => game.dice, [game.dice]);
   const setDice = useCallback(
@@ -69,6 +71,13 @@ export default function App() {
     });
   }, [dice, game, solved.score]);
 
+  const onBank = useCallback(() => {
+    setGame({
+      ...initialGame,
+      score: game.score + game.runScore + game.addScore,
+    });
+  }, [game.addScore, game.runScore, game.score]);
+
   const onSelectDie = useCallback(
     (i) => {
       const d = dice[i];
@@ -113,6 +122,9 @@ export default function App() {
       <div>
         <button onClick={onThrow} disabled={!throwable}>
           Throw!
+        </button>
+        <button onClick={onBank} disabled={game.runScore + game.addScore < 300}>
+          Bank
         </button>
       </div>
     </>
