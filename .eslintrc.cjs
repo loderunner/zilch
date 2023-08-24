@@ -24,6 +24,7 @@ module.exports = {
     curly: ['error', 'all'],
     'prefer-const': 'error',
     eqeqeq: 'error',
+    'object-shorthand': ['warn', 'always'],
     'react-refresh/only-export-components': [
       'warn',
       { allowConstantExport: true },

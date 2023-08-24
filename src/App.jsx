@@ -3,16 +3,28 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Die from './Die.jsx';
 import solve from './solve';
 
+const DieState = {
+  THROWN: 'thrown',
+  SELECTED: 'selected',
+  USED: 'used',
+};
+
+const GameStage = {
+  THROWING: 'throwing',
+  SELECTING: 'selecting',
+};
+
 const initialGame = {
+  stage: GameStage.THROWING,
   score: 0,
   runScore: 0,
   addScore: 0,
   dice: [
-    { value: 1, state: 'used' },
-    { value: 1, state: 'used' },
-    { value: 1, state: 'used' },
-    { value: 1, state: 'used' },
-    { value: 1, state: 'used' },
+    { value: 1, state: DieState.USED },
+    { value: 1, state: DieState.USED },
+    { value: 1, state: DieState.USED },
+    { value: 1, state: DieState.USED },
+    { value: 1, state: DieState.USED },
   ],
 };
 
@@ -26,11 +38,21 @@ export default function App() {
   );
 
   const selected = useMemo(
-    () => dice.filter((d) => d.state === 'selected'),
+    () => dice.filter((d) => d.state === DieState.SELECTED),
     [dice],
   );
 
-  const solved = useMemo(() => solve(selected.map((d) => d.value)), [selected]);
+  const solved = useMemo(() => {
+    const s = solve(selected.map((d) => d.value));
+    const total = s.reduce(
+      (acc, c) => ({
+        score: acc.score + c.score,
+        used: acc.used + c.dice.length,
+      }),
+      { score: 0, used: 0 },
+    );
+    return { ...total, combos: s };
+  }, [selected]);
 
   const valid = useMemo(
     () => solved.used === selected.length,
@@ -38,10 +60,10 @@ export default function App() {
   );
 
   const throwable = useMemo(() => {
-    if (dice.every((d) => d.state === 'used')) {
+    if (dice.every((d) => d.state === DieState.USED)) {
       return true;
     }
-    if (dice.some((d) => d.state === 'selected')) {
+    if (dice.some((d) => d.state === DieState.SELECTED)) {
       return valid;
     }
     return false;
@@ -49,19 +71,22 @@ export default function App() {
 
   const onThrow = useCallback(() => {
     const first = dice.every(
-      (d) => d.state === 'used' || d.state === 'selected',
+      (d) => d.state === DieState.USED || d.state === DieState.SELECTED,
     );
 
     const next = dice.map((d) => {
       if (!first) {
-        if (d.state === 'used') {
+        if (d.state === DieState.USED) {
           return { ...d };
         }
-        if (d.state === 'selected') {
-          return { ...d, state: 'used' };
+        if (d.state === DieState.SELECTED) {
+          return { ...d, state: DieState.USED };
         }
       }
-      return { value: Math.floor(Math.random() * 6) + 1, state: 'thrown' };
+      return {
+        value: Math.floor(Math.random() * 6) + 1,
+        state: DieState.THROWN,
+      };
     });
     setGame({
       ...game,
@@ -82,10 +107,10 @@ export default function App() {
     (i) => {
       const d = dice[i];
       let state;
-      if (d.state === 'thrown') {
-        state = 'selected';
-      } else if (d.state === 'selected') {
-        state = 'thrown';
+      if (d.state === DieState.THROWN) {
+        state = DieState.SELECTED;
+      } else if (d.state === DieState.SELECTED) {
+        state = DieState.THROWN;
       } else {
         state = d.state;
       }
