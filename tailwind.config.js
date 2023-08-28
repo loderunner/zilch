@@ -2,7 +2,11 @@
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
-    extend: {},
+    extend: {
+      backgroundImage: {
+        table: "url('/src/assets/green-felt-background.jpg')",
+      },
+    },
   },
   plugins: [],
 };

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import ControlBar from './ControlBar.jsx';
-import Die from './Die.jsx';
 import {
   DieState,
   GameStage,
@@ -13,6 +12,7 @@ import {
   useStage,
 } from './game.js';
 import solve from './solve.js';
+import Table from './Table.jsx';
 
 export default function App() {
   const [stage, setStage] = useStage();
@@ -75,6 +75,7 @@ export default function App() {
     const nextPlayers = structuredClone(players);
     nextPlayers[currentPlayer].score += runScore;
     const nextDice = dice.map((d) => ({ ...d, state: DieState.USED }));
+
     setStage(GameStage.READY);
     setPlayers(nextPlayers);
     setCurrentPlayer((currentPlayer + 1) % players.length);
@@ -96,6 +97,7 @@ export default function App() {
 
   const onNextPlayer = useCallback(() => {
     const nextDice = dice.map((d) => ({ ...d, state: DieState.USED }));
+
     setStage(GameStage.READY);
     setCurrentPlayer((currentPlayer + 1) % players.length);
     setRunScore(0);
@@ -136,6 +138,7 @@ export default function App() {
     if (stage === GameStage.THROWING) {
       const unused = dice.filter((d) => d.state !== DieState.USED);
       const unusedSolved = solve(unused.map((d) => d.value));
+
       if (unusedSolved.used === 0) {
         setStage(GameStage.LOSE);
       } else {
@@ -146,17 +149,12 @@ export default function App() {
 
   return (
     <>
-      <div>
-        {dice.map((d, i) => (
-          <Die
-            key={i}
-            die={d}
-            enabled={stage === GameStage.SELECTING && d.state !== DieState.USED}
-            valid={selectedValid}
-            onSelect={() => onSelectDie(i)}
-          />
-        ))}
-      </div>
+      <Table
+        stage={stage}
+        dice={dice}
+        selectedValid={selectedValid}
+        onSelectDie={onSelectDie}
+      />
       <div>
         Score: {players[currentPlayer].score}
         Run: {runScore}

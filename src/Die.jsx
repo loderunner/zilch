@@ -1,21 +1,32 @@
 import clsx from 'clsx';
 
-const faces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+import die1 from './assets/die-1.png';
+import die2 from './assets/die-2.png';
+import die3 from './assets/die-3.png';
+import die4 from './assets/die-4.png';
+import die5 from './assets/die-5.png';
+import die6 from './assets/die-6.png';
 
-export default function Die({ die, valid, enabled, onSelect }) {
+const faces = [die1, die2, die3, die4, die5, die6];
+
+export default function Die({ die, position, valid, enabled, onSelect }) {
   const { value, state } = die;
   return (
     <button
       className={clsx([
+        'absolute',
+        'origin-center',
         state === 'used' ? 'opacity-50' : 'opacity-100',
         state === 'selected' ? 'border' : 'border-none',
         valid ? 'border-slate-700' : 'border-red-400',
-        'mx-2',
       ])}
+      style={{
+        transform: `translate(calc(${position.x}px - 50%), calc(${position.y}px - 50%)) rotate(${position.rot}rad)`,
+      }}
       onClick={onSelect}
       disabled={!enabled}
     >
-      {faces[value - 1]}
+      <img src={faces[value - 1]} className="w-10 h-10" />
     </button>
   );
 }
