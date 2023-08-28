@@ -33,8 +33,12 @@ export default function App() {
   );
 
   useEffect(() => {
-    setAddScore(selectedSolved.score);
-  }, [selectedSolved.score, setAddScore]);
+    if (selectedSolved.used === selected.length) {
+      setAddScore(selectedSolved.score);
+    } else {
+      setAddScore(0);
+    }
+  }, [selected.length, selectedSolved.score, selectedSolved.used, setAddScore]);
 
   const selectedValid = useMemo(
     () => selected.length > 0 && selectedSolved.used === selected.length,
@@ -155,6 +159,7 @@ export default function App() {
         selectedValid={selectedValid}
         onSelectDie={onSelectDie}
       />
+      <div>{players[currentPlayer].name}</div>
       <div>
         Score: {players[currentPlayer].score}
         Run: {runScore}
