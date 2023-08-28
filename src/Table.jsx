@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 import Die from './Die.jsx';
 import { DieState, GameStage } from './game';
@@ -51,6 +51,7 @@ export default function Table({
   selectedValid,
   onSelectDie,
 }) {
+  const ref = useRef();
   const [positions, setPositions] = useState([
     { x: 0, y: 0, rot: 0 },
     { x: 0, y: 0, rot: 0 },
@@ -60,12 +61,14 @@ export default function Table({
   ]);
   useLayoutEffect(() => {
     if (stage === GameStage.THROWING) {
-      setPositions(randomPositions(dice, positions, 576, 40));
+      setPositions(
+        randomPositions(dice, positions, ref.current.clientWidth, 40),
+      );
       setStage(GameStage.THROWN);
     }
   }, [dice, positions, setStage, stage]);
   return (
-    <div className={clsx(['bg-table', 'aspect-square', 'max-w-xl'])}>
+    <div ref={ref} className={clsx(['bg-table', 'aspect-square', 'max-w-xl'])}>
       {stage !== GameStage.START
         ? dice.map((d, i) => (
             <Die
