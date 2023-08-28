@@ -56,7 +56,7 @@ export default function Table({ stage, dice, selectedValid, onSelectDie }) {
     if (stage === GameStage.THROWING) {
       setPositions(randomPositions(dice, positions, 576, 40));
     }
-  }, [dice, stage]);
+  }, [dice, positions, stage]);
   return (
     <div className={clsx(['bg-table', 'aspect-square', 'max-w-xl'])}>
       {stage !== GameStage.START
