@@ -24,6 +24,7 @@ export default function ControlBar({
   const buttons = [];
 
   switch (stage) {
+    case GameStage.START:
     case GameStage.READY:
       buttons.push(
         <button key="throw" onClick={onThrow}>

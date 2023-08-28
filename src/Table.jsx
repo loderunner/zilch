@@ -39,16 +39,20 @@ export default function Table({ stage, dice, selectedValid, onSelectDie }) {
   }, [stage]);
   return (
     <div className={clsx(['bg-table', 'aspect-square', 'max-w-xl'])}>
-      {dice.map((d, i) => (
-        <Die
-          key={i}
-          die={d}
-          position={positions[i]}
-          enabled={stage === GameStage.SELECTING && d.state !== DieState.USED}
-          valid={selectedValid}
-          onSelect={() => onSelectDie(i)}
-        />
-      ))}
+      {stage !== GameStage.START
+        ? dice.map((d, i) => (
+            <Die
+              key={i}
+              die={d}
+              position={positions[i]}
+              enabled={
+                stage === GameStage.SELECTING && d.state !== DieState.USED
+              }
+              valid={selectedValid}
+              onSelect={() => onSelectDie(i)}
+            />
+          ))
+        : null}
     </div>
   );
 }

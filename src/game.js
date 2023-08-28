@@ -7,6 +7,7 @@ export const DieState = {
 };
 
 export const GameStage = {
+  START: 'start',
   READY: 'ready',
   THROWING: 'throwing',
   SELECTING: 'selecting',
@@ -14,7 +15,7 @@ export const GameStage = {
 };
 
 export function useStage() {
-  return useState(GameStage.READY);
+  return useState(GameStage.START);
 }
 
 /**

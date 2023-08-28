@@ -76,7 +76,7 @@ export default function App() {
     nextPlayers[currentPlayer].score += runScore;
     const nextDice = dice.map((d) => ({ ...d, state: DieState.USED }));
 
-    setStage(GameStage.READY);
+    setStage(GameStage.START);
     setPlayers(nextPlayers);
     setCurrentPlayer((currentPlayer + 1) % players.length);
     setRunScore(0);
@@ -98,7 +98,7 @@ export default function App() {
   const onNextPlayer = useCallback(() => {
     const nextDice = dice.map((d) => ({ ...d, state: DieState.USED }));
 
-    setStage(GameStage.READY);
+    setStage(GameStage.START);
     setCurrentPlayer((currentPlayer + 1) % players.length);
     setRunScore(0);
     setAddScore(0);
