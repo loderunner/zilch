@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 
 import Die from './Die.jsx';
 import { DieState, GameStage } from './game';
@@ -44,7 +44,13 @@ function randomPositions(dice, positions, tableSize, dieSize) {
   return newPositions;
 }
 
-export default function Table({ stage, dice, selectedValid, onSelectDie }) {
+export default function Table({
+  stage,
+  setStage,
+  dice,
+  selectedValid,
+  onSelectDie,
+}) {
   const [positions, setPositions] = useState([
     { x: 0, y: 0, rot: 0 },
     { x: 0, y: 0, rot: 0 },
@@ -52,11 +58,12 @@ export default function Table({ stage, dice, selectedValid, onSelectDie }) {
     { x: 0, y: 0, rot: 0 },
     { x: 0, y: 0, rot: 0 },
   ]);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (stage === GameStage.THROWING) {
       setPositions(randomPositions(dice, positions, 576, 40));
+      setStage(GameStage.THROWN);
     }
-  }, [dice, positions, stage]);
+  }, [dice, positions, setStage, stage]);
   return (
     <div className={clsx(['bg-table', 'aspect-square', 'max-w-xl'])}>
       {stage !== GameStage.START

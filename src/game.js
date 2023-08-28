@@ -10,6 +10,7 @@ export const GameStage = {
   START: 'start',
   READY: 'ready',
   THROWING: 'throwing',
+  THROWN: 'thrown',
   SELECTING: 'selecting',
   LOSE: 'lose',
 };

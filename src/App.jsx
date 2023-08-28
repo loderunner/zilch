@@ -139,7 +139,7 @@ export default function App() {
   );
 
   useEffect(() => {
-    if (stage === GameStage.THROWING) {
+    if (stage === GameStage.THROWN) {
       const unused = dice.filter((d) => d.state !== DieState.USED);
       const unusedSolved = solve(unused.map((d) => d.value));
 
@@ -155,6 +155,7 @@ export default function App() {
     <>
       <Table
         stage={stage}
+        setStage={setStage}
         dice={dice}
         selectedValid={selectedValid}
         onSelectDie={onSelectDie}
