@@ -1,7 +1,7 @@
 import combinations from './combinations';
 
 /**
- * @typedef {{score: number, dice: number[]}} Combo
+ * @typedef {{points: number, dice: number[]}} Combo
  */
 
 /**
@@ -27,7 +27,7 @@ function stringToDice(str) {
 
 /**
  * @param {number[]} dice
- * @returns {Combo[]}
+ * @returns {{score: number, used: number, combos: Combo[]}
  */
 export default function solve(dice) {
   const diceStr = diceToString(dice);
@@ -46,22 +46,34 @@ export default function solve(dice) {
 
   if (!combo || combo.length === 0) {
     if (dice.length === 5) {
-      return [
-        {
-          score: 500,
-          dice: stringToDice(diceStr),
-        },
-      ];
+      return {
+        score: 500,
+        used: 5,
+        combos: [
+          {
+            points: 500,
+            dice: stringToDice(diceStr),
+          },
+        ],
+      };
     }
-    return [];
+    return { score: 0, used: 0, combos: [] };
   }
 
   if (dice.length > combo.length) {
     const nextDice = stringToDice(diceStr);
     nextDice.splice(comboIndex, combo.length);
     const subSolve = solve(nextDice);
-    return [{ score: max, dice: stringToDice(combo) }, ...subSolve];
+    return {
+      score: max + subSolve.score,
+      used: combo.length + subSolve.used,
+      combos: [{ points: max, dice: stringToDice(combo) }, ...subSolve.combos],
+    };
   }
 
-  return [{ score: max, dice: stringToDice(combo) }];
+  return {
+    score: max,
+    used: combo.length,
+    combos: [{ points: max, dice: stringToDice(combo) }],
+  };
 }

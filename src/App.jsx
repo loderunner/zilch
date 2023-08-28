@@ -1,86 +1,53 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
+import ControlBar from './ControlBar.jsx';
 import Die from './Die.jsx';
-import solve from './solve';
-
-const DieState = {
-  THROWN: 'thrown',
-  SELECTED: 'selected',
-  USED: 'used',
-};
-
-const GameStage = {
-  THROWING: 'throwing',
-  SELECTING: 'selecting',
-};
-
-const initialGame = {
-  stage: GameStage.THROWING,
-  score: 0,
-  runScore: 0,
-  addScore: 0,
-  dice: [
-    { value: 1, state: DieState.USED },
-    { value: 1, state: DieState.USED },
-    { value: 1, state: DieState.USED },
-    { value: 1, state: DieState.USED },
-    { value: 1, state: DieState.USED },
-  ],
-};
+import {
+  DieState,
+  GameStage,
+  useAddScore,
+  useCurrentPlayer,
+  useDice,
+  usePlayers,
+  useRunScore,
+  useStage,
+} from './game.js';
+import solve from './solve.js';
 
 export default function App() {
-  const [game, setGame] = useState(initialGame);
-
-  const dice = useMemo(() => game.dice, [game.dice]);
-  const setDice = useCallback(
-    (newDice) => setGame({ ...game, dice: newDice }),
-    [game],
-  );
+  const [stage, setStage] = useStage();
+  const [players, setPlayers] = usePlayers('Player 1', 'Player 2');
+  const [dice, setDice] = useDice();
+  const [addScore, setAddScore] = useAddScore();
+  const [runScore, setRunScore] = useRunScore();
+  const [currentPlayer, setCurrentPlayer] = useCurrentPlayer();
 
   const selected = useMemo(
     () => dice.filter((d) => d.state === DieState.SELECTED),
     [dice],
   );
 
-  const solved = useMemo(() => {
-    const s = solve(selected.map((d) => d.value));
-    const total = s.reduce(
-      (acc, c) => ({
-        score: acc.score + c.score,
-        used: acc.used + c.dice.length,
-      }),
-      { score: 0, used: 0 },
-    );
-    return { ...total, combos: s };
-  }, [selected]);
-
-  const valid = useMemo(
-    () => solved.used === selected.length,
-    [selected.length, solved.used],
+  const selectedSolved = useMemo(
+    () => solve(selected.map((d) => d.value)),
+    [selected],
   );
 
-  const throwable = useMemo(() => {
-    if (dice.every((d) => d.state === DieState.USED)) {
-      return true;
-    }
-    if (dice.some((d) => d.state === DieState.SELECTED)) {
-      return valid;
-    }
-    return false;
-  }, [dice, valid]);
+  useEffect(() => {
+    setAddScore(selectedSolved.score);
+  }, [selectedSolved.score, setAddScore]);
+
+  const selectedValid = useMemo(
+    () => selected.length > 0 && selectedSolved.used === selected.length,
+    [selected.length, selectedSolved.used],
+  );
 
   const onThrow = useCallback(() => {
-    const first = dice.every(
-      (d) => d.state === DieState.USED || d.state === DieState.SELECTED,
-    );
+    const first = dice.every((d) => d.state === DieState.USED);
 
-    const next = dice.map((d) => {
+    const nextDice = dice.map((d) => {
       if (!first) {
         if (d.state === DieState.USED) {
-          return { ...d };
-        }
-        if (d.state === DieState.SELECTED) {
-          return { ...d, state: DieState.USED };
+          return d;
         }
       }
       return {
@@ -88,20 +55,62 @@ export default function App() {
         state: DieState.THROWN,
       };
     });
-    setGame({
-      ...game,
-      runScore: game.runScore + solved.score,
-      addScore: 0,
-      dice: next,
-    });
-  }, [dice, game, solved.score]);
+
+    setStage(GameStage.THROWING);
+    setDice(nextDice);
+  }, [dice, setDice, setStage]);
+
+  const onPick = useCallback(() => {
+    const nextDice = dice.map((d) =>
+      d.state === DieState.SELECTED ? { ...d, state: DieState.USED } : d,
+    );
+
+    setStage(GameStage.READY);
+    setRunScore(runScore + addScore);
+    setAddScore(0);
+    setDice(nextDice);
+  }, [addScore, dice, runScore, setAddScore, setDice, setRunScore, setStage]);
 
   const onBank = useCallback(() => {
-    setGame({
-      ...initialGame,
-      score: game.score + game.runScore + game.addScore,
-    });
-  }, [game.addScore, game.runScore, game.score]);
+    const nextPlayers = structuredClone(players);
+    nextPlayers[currentPlayer].score += runScore;
+    const nextDice = dice.map((d) => ({ ...d, state: DieState.USED }));
+    setStage(GameStage.READY);
+    setPlayers(nextPlayers);
+    setCurrentPlayer((currentPlayer + 1) % players.length);
+    setRunScore(0);
+    setAddScore(0);
+    setDice(nextDice);
+  }, [
+    currentPlayer,
+    dice,
+    players,
+    runScore,
+    setAddScore,
+    setCurrentPlayer,
+    setDice,
+    setPlayers,
+    setRunScore,
+    setStage,
+  ]);
+
+  const onNextPlayer = useCallback(() => {
+    const nextDice = dice.map((d) => ({ ...d, state: DieState.USED }));
+    setStage(GameStage.READY);
+    setCurrentPlayer((currentPlayer + 1) % players.length);
+    setRunScore(0);
+    setAddScore(0);
+    setDice(nextDice);
+  }, [
+    currentPlayer,
+    dice,
+    players.length,
+    setAddScore,
+    setCurrentPlayer,
+    setDice,
+    setRunScore,
+    setStage,
+  ]);
 
   const onSelectDie = useCallback(
     (i) => {
@@ -124,34 +133,44 @@ export default function App() {
   );
 
   useEffect(() => {
-    if (valid) {
-      setGame({ ...game, addScore: solved.score });
-    } else {
-      setGame({ ...game, addScore: 0 });
+    if (stage === GameStage.THROWING) {
+      const unused = dice.filter((d) => d.state !== DieState.USED);
+      const unusedSolved = solve(unused.map((d) => d.value));
+      if (unusedSolved.used === 0) {
+        setStage(GameStage.LOSE);
+      } else {
+        setStage(GameStage.SELECTING);
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected]);
+  }, [dice, setStage, stage]);
 
   return (
     <>
       <div>
         {dice.map((d, i) => (
-          <Die key={i} die={d} valid={valid} onSelect={() => onSelectDie(i)} />
+          <Die
+            key={i}
+            die={d}
+            enabled={stage === GameStage.SELECTING && d.state !== DieState.USED}
+            valid={selectedValid}
+            onSelect={() => onSelectDie(i)}
+          />
         ))}
       </div>
       <div>
-        Score: {game.score}
-        Run: {game.runScore}
-        {game.addScore ? `+${game.addScore}` : null}
+        Score: {players[currentPlayer].score}
+        Run: {runScore}
+        {addScore ? `+${addScore}` : null}
       </div>
-      <div>
-        <button onClick={onThrow} disabled={!throwable}>
-          Throw!
-        </button>
-        <button onClick={onBank} disabled={game.runScore + game.addScore < 300}>
-          Bank
-        </button>
-      </div>
+      <ControlBar
+        stage={stage}
+        runScore={runScore}
+        selectedValid={selectedValid}
+        onThrow={onThrow}
+        onPick={onPick}
+        onBank={onBank}
+        onNextPlayer={onNextPlayer}
+      />
     </>
   );
 }

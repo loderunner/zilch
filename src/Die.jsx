@@ -2,7 +2,7 @@ import clsx from 'clsx';
 
 const faces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
 
-export default function Die({ die, valid, onSelect }) {
+export default function Die({ die, valid, enabled, onSelect }) {
   const { value, state } = die;
   return (
     <button
@@ -13,6 +13,7 @@ export default function Die({ die, valid, onSelect }) {
         'mx-2',
       ])}
       onClick={onSelect}
+      disabled={!enabled}
     >
       {faces[value - 1]}
     </button>
