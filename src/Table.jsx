@@ -68,7 +68,7 @@ export default function Table({
     }
   }, [dice, positions, setStage, stage]);
   return (
-    <div ref={ref} className={clsx(['bg-table', 'aspect-square', 'max-w-xl'])}>
+    <div ref={ref} className={clsx(['bg-table', 'aspect-square', 'sm:w-xl'])}>
       {stage !== GameStage.START
         ? dice.map((d, i) => (
             <Die

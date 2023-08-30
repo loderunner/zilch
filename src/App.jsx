@@ -152,7 +152,7 @@ export default function App() {
   }, [dice, setStage, stage]);
 
   return (
-    <>
+    <div className="container flex flex-col bg-slate-100 sm:flex-row">
       <Table
         stage={stage}
         setStage={setStage}
@@ -175,6 +175,6 @@ export default function App() {
         onBank={onBank}
         onNextPlayer={onNextPlayer}
       />
-    </>
+    </div>
   );
 }
