@@ -8,6 +8,8 @@ export default {
       },
       backgroundImage: {
         table: "url('/src/assets/green-felt-background.jpg')",
+        'gradient-radial':
+          'radial-gradient(circle at center, var(--tw-gradient-stops))',
       },
     },
   },
