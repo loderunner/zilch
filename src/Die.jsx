@@ -17,8 +17,8 @@ export default function Die({ die, position, valid, enabled, onSelect }) {
         'absolute',
         'origin-center',
         state === 'used' ? 'opacity-50' : 'opacity-100',
-        state === 'selected' ? 'border' : 'border-none',
-        valid ? 'border-slate-700' : 'border-red-400',
+        state === 'selected' ? 'border-2' : 'border-none',
+        valid ? 'border-sky-500' : 'border-red-400',
       ])}
       style={{
         transform: `translate(calc(${position.x}px - 50%), calc(${position.y}px - 50%)) rotate(${position.rot}rad)`,
@@ -26,7 +26,7 @@ export default function Die({ die, position, valid, enabled, onSelect }) {
       onClick={onSelect}
       disabled={!enabled}
     >
-      <img src={faces[value - 1]} className="w-10 h-10" />
+      <img src={faces[value - 1]} className="h-10 w-10" />
     </button>
   );
 }

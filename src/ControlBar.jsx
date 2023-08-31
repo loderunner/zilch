@@ -1,5 +1,7 @@
 import { GameStage } from './game';
 
+import './ControlBar.css';
+
 /**
  *
  * @param {{
@@ -57,5 +59,9 @@ export default function ControlBar({
       break;
   }
 
-  return <div>{buttons}</div>;
+  return (
+    <div className="control-bar flex flex-row justify-center bg-red-50">
+      {buttons}
+    </div>
+  );
 }

@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .control-bar button {
+    @apply m-3 rounded-md bg-green-600 px-5 py-3 text-white hover:bg-green-800 active:bg-green-700 disabled:bg-green-300;
+    transition: background-color 0.3s;
+  }
+}

@@ -11,6 +11,8 @@ import {
   useRunScore,
   useStage,
 } from './game.js';
+import RunBar from './RunBar.jsx';
+import ScoreBoard from './ScoreBoard.jsx';
 import solve from './solve.js';
 import Table from './Table.jsx';
 
@@ -152,29 +154,29 @@ export default function App() {
   }, [dice, setStage, stage]);
 
   return (
-    <div className="container flex flex-col bg-slate-100 sm:flex-row">
-      <Table
-        stage={stage}
-        setStage={setStage}
-        dice={dice}
-        selectedValid={selectedValid}
-        onSelectDie={onSelectDie}
-      />
-      <div>{players[currentPlayer].name}</div>
-      <div>
-        Score: {players[currentPlayer].score}
-        Run: {runScore}
-        {addScore ? `+${addScore}` : null}
+    <div className="container flex flex-col bg-slate-100 md:flex-row">
+      <div className="flex flex-col">
+        <Table
+          stage={stage}
+          setStage={setStage}
+          dice={dice}
+          selectedValid={selectedValid}
+          onSelectDie={onSelectDie}
+        />
+        <ControlBar
+          stage={stage}
+          runScore={runScore}
+          selectedValid={selectedValid}
+          onThrow={onThrow}
+          onPick={onPick}
+          onBank={onBank}
+          onNextPlayer={onNextPlayer}
+        />
       </div>
-      <ControlBar
-        stage={stage}
-        runScore={runScore}
-        selectedValid={selectedValid}
-        onThrow={onThrow}
-        onPick={onPick}
-        onBank={onBank}
-        onNextPlayer={onNextPlayer}
-      />
+      <div className="flex w-full flex-col px-6 py-4">
+        <RunBar runScore={runScore} addScore={addScore} />
+        <ScoreBoard players={players} currentPlayer={currentPlayer} />
+      </div>
     </div>
   );
 }
